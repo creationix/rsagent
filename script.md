@@ -1,8 +1,6 @@
-Codename:
+# Grapnel
 
-Grapnel
-
-High Level Properties:
+## High Level Properties:
 
 - Combination of real OS threads and green-threads for optimal effeciency.
 - No shared state between functions except for parameters in and out.
@@ -15,13 +13,13 @@ High Level Properties:
 
 - avoids need for mutation of values and prefers functional style.
 
-Primitives:
+## Primitives:
 
 - number (64 bit integer and 64+64 bit rational)
 - boolean (true/false)
 - symbol (interned string for quick symbolic comparisons)
 
-Collections:
+## Collections:
 
 - Map (HashMap - unordered keys)
 - Set (essentially map where all values are true)
@@ -29,19 +27,19 @@ Collections:
 - String (mutable cons list of unicode characters)
 - Buffer (same as string, but for bytes instead of characters)
 
-Traits / Objects:
+## Traits / Objects:
 
 - Like map, but symbol to value mapping and static shaped.  Shape is interned.
 - Trait holds default values, but values may be replaced locally with same type.
 - An object can have multiple traits so long as public keys don't conflict.
 
-Function:
+## Function:
 
 - A function is a block of code that accepts named, positional, and out arguments.
 - There is no shared state between functions other than explicitly passed values.
 - arguments have type and optional default values.
 
-Loops:
+## Loops:
 
 - Iteration in the form `for k v in value:` or `for v in value:`.
   - Iterating over integer gives key and value of 0 to value - 1.
@@ -53,7 +51,7 @@ Loops:
 - Optional `when cond` after loop to filter out certain values.
 - `for ... in` results in last value of last loop if no `into ...` is present.
 
-Basic Operators:
+## Basic Operators:
 
 add, sub, mul, div, idiv, mod, neg (numbers in and out)
 gt, gte, lt, lte, eq, neq (same type and comparable in, boolean out)
@@ -63,7 +61,7 @@ remove (works on maps/sets only)
 union, difference, intersect (maps/sets only)
 add-trait, remove-trait, has-trait (objects)
 
-Type Conversions:
+## Type Conversions:
 
 string-to-symbol: in string, out symbol
 symbol-to-string: in symbol, out string
@@ -81,7 +79,7 @@ unzip(map-to-lists): in map, out key-list, out value-list
 object-to-map: in object, in list<traits>, out map
 map-to-object: in map, in list<traits>, out map, throws trait-key-collision
 
-Syntax:
+## Syntax:
 
 - python-like significant whitespace.  Heavy IDE assistance.
 - infix notation for common operators.
