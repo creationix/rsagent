@@ -2,6 +2,19 @@ Codename:
 
 Grapnel
 
+High Level Properties:
+
+- Combination of real OS threads and green-threads for optimal effeciency.
+- No shared state between functions except for parameters in and out.
+- Internal scheduler automatically schedules optimally.
+
+- Optional typing and type inference for safty and performance.
+- Traits instead of classes for saner OOP.
+
+- Uniform, elegant iteration and looping construct.
+
+- avoids need for mutation of values and prefers functional style.
+
 Primitives:
 
 - number (64 bit integer and 64+64 bit rational)
