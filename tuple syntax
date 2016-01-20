@@ -1,0 +1,241 @@
+# Tuple
+
+Tuple syntax provides a way to pass values around in bulk without creating
+containers or objects.  It's mostly used to make our simple functions powerful,
+but can be used in any situation where expressions are being transferred.
+
+There are two halves to the tuple system, the senders and the receivers (or
+right-hand-side and left-hand-side) in traditional programming language speak.
+
+## Sender
+
+The sender's job is to pack several values into a structure to pass to a
+receiver. It is simple a list of positional and named expressions.
+
+```grapnel
+// Passing two values to something.  This is simply comma separated valued
+// between parentheses.
+(1 * y, 2 * x)
+
+// Passing two named arguments to something.
+(name="Tim", age=33)
+```
+
+## Receiver
+
+The receiver has place holders for catching values.  If values are in the same
+location in sender and receiver, they are passed through.
+
+- The receiver can have a subset of fields and the extra sent values are
+  ignored.
+- The receiver can have a superset of fields as long as it's extra fields
+  contains default values.
+- Any field can have an optional type to restrict what it's allowed to catch.
+- A field can have a local `as` alias to use a different name locally than the
+  sender used remotely.
+
+The syntax for a tuple item is `name as alias : type = default` where
+`as alias`, `: type`, and `= default` are all optional.
+
+```grapnel
+// Simple variable swap
+(a, b) <- (b, a)
+// subset of named fields
+(name) <- (name="Tim", age=33)
+// superset of named fields using defaults
+(name, programmer=true) <- (name="Tim", age=33)
+// Type annotations
+(name: String, age: Number) <- (name="Tim", age=33)
+// Local alias
+(name as myName, age as myAge)
+```
+
+## Empty and Single tuples
+
+Empty tuples can be used as a void type for ignoring sent values or for sending
+no values.
+
+Since there are no tuples of exactly one value, parentheses can still be used
+for operator precedence grouping in arithmetic expressions.
+
+Also you can omit parentheses if you want just the first positional value.  In fact
+most sub-expressions are technically the same as single-length tuples without
+parentheses.
+
+```grapnel
+sum <- (1 + 2) * 3
+```
+
+# Functions
+
+This syntax is used heavily in grapnel function call and return syntax since
+all functions take exactly one value and return exactly one value.
+
+There are two syntaxes for calling functions, they are pipe and prefix.
+
+Prefix is what most typical languages have.  In Grapnel it's done by simply
+writing the function name (or expression) followed by a single expression (or
+tuple) for it's argument(s).
+
+```grapnel
+fn arg
+fn(arg)
+fn(arg1, arg2)
+fn()
+```
+
+If you wish to call a function with no arguments, an empty tuple is required.
+
+This function application expression can be used like any other expression and
+it's result can be extracted using a receiver.
+
+```grapnel
+(name, age) <= getUser(id)
+```
+
+## Pipe Syntax
+
+Sometimes you wish to have a chain of transforms.  For example, the following
+is cumbersome in normal syntax.
+
+```grapnel
+exclaim(capitalize(doubleSay("hello")))
+```
+
+Notice how the order is inversed and the parentheses build up towards the end.
+
+This same example can be written as:
+
+```grapnel
+"hello" | doubleSay | capitalize | exclaim
+```
+
+You can even use pipe syntax to assign to variables.
+
+```
+("Tim", 33) | (name, age)
+"Hello " + name | print
+```
+
+-------------------------
+
+
+TODO: problems with design.
+
+- Too many ways to do things?  Why do we have normal function calls as well as
+  pipe syntax?
+- `foo | function` looks just like `foo | target`.  Should we pipe or assign?
+   Maybe add `->` redirect syntax for assignment?
+- Should we also add `<-` for normal calls, inverse pipe?
+
+```grapnel
+("Tim", 33) -> (name, age)
+print <- "Hello World" // Instead of `print "Hello World"`
+capitalize <- "hello" -> greeting // Capitalize the string and store in greeting
+command1 | command2 | command3 -> outputVar
+```
+
+- What about tuples in the middle of a pipe chain?  How can they act as
+  receivers and senders?  We do at least have the distinction between `|` and
+  `->`.
+
+```grapnel
+// Read `id` variable, eventually write `username` and `age` variables.
+id | getUser | (name, age=100) > (username, age)
+```
+
+- We seem to have a problem with positional args vs named args being ambiguous.
+
+## Sender-Receiver Matching Algorithm
+
+Perhaps writing out the algorithm will clear up ambiguities.
+
+In a sender, we have 0 or more slots, each has:
+
+ - position/name
+ - value (can include reading from local variables)
+
+In a receiver, we have 0 or more slots, each has:
+
+ - position/name
+ - local name (writing to local variables)
+ - default value
+ - type constraint
+
+If we allow combined sender-receivers for the middle of pipe chains, it needs
+all of these:
+
+ - send position/name
+ - value
+ - receive position/name
+ - default value
+ - type constraint
+
+This means we need an unambiguous syntax for all of these possible combinations.
+Keep in mind that `value` can be an identifier for reading a local variable as
+an expression.
+
+We can have a `name:` prefix to allow for field naming.  This does mean we have
+to name both the field and the argument name though.  Maybe a syntax for both
+for convenience when they are the same?
+
+    (arg1, arg2, name: arg3)
+
+I think a postfix `= expression` is best for default values.
+
+    (arg1, arg2 = value)
+
+Maybe tuple code would be cleaner if type information lived on standalone lines
+at the top of a block?  This would make it hard to type things in pipe chains
+though.  It does make it possible to assert types anywhere, not just at
+receivers.
+
+Punting on type annotations for now, what about dual types in pipe chains?
+
+Suppose we have a function `getUser` that accepts an id and returns
+`(name:, color:)`.  We have another function `showUser` that expects
+`(username:, age:)`.  We want to pipe from `id`, through `getuser`, ignore
+`color`, add in `age`, and send to `showuser`.
+
+    id | getUser | (???) | showUser
+
+It seems the problem is we don't know what return type a receiver has.  It looks
+like a statement, not an expression.
+
+    // Normal assignment in new syntax
+    "Tim" -> name
+
+    // Normal function call in new syntax
+    print <- "Hello World"
+
+    // Or is it another way to do assignment?
+    // No, this is calling a function `name`.
+    name <- "Tim"
+
+    // Same call using pipe syntax
+    "Hello World" | print
+
+    // Calling function with no arguments and no output
+    () | foo
+    foo()
+    foo(1)
+    foo 1
+    foo(1,2)
+
+
+
+
+
+songs | random | song
+
+song (random (songs) )
+
+song <- random < songs
+
+print("Hello World")
+
+print "Hello World"
+
+"Hello World" | print
+
+print <- "Hello World"

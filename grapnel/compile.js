@@ -20,20 +20,25 @@ function test(code) {
   return p(parser.parse(code));
 }
 
+test("(a, b=3) := (b, a)");
 test("(a, b) := (b, a)");
-test("(1, 2) | print");
-test("5 | print");
-test("print()");
-test("(x) := ()");
+test("(a=2, b) := (b, a)");
+test("if true { false } elif 43 { 0 } else { 2 }")
+// test("(1, 2) | print");
+// test("5 | print");
+// test("print()");
+// test("(x) := ()");
 // test("(name, age) := loadUser(id)");
-test("42 | double | print");
-test("():=1");
-test("x:=1");
-
-test("def fib n {\n" +
-// "  if n = 0 { } \n" +
-"  \n" +
-"}")
+// test("42 | double | print");
+// test("x:=1");
+// test("let y");
+// test("let z := 100");
+// test("def fib(n=3) {\n" +
+// "  return 1 * 2 - 3 / 4\n" +
+// "  \n" +
+// "}");
+// test("namespace stuff { 1 - 2 }");
+// test("foo.bar.baz");
 // // p(parser.parse("(a):=1"));
 // p(parser.parse("a:=1"));
 // p(parser.parse("(a,b):=1"));

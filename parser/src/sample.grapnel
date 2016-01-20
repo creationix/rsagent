@@ -1,0 +1,106 @@
+// style 1
+do-thing arg1 name: argNamed arg2 arg3 | sort > myList
+
+// s-expression style
+(set myList
+  (mcall sort ()
+    (call do-thing arg1 name: argNamed arg2 arg3)))
+
+echo "Hello World"
+
+(call echo "Hello World")
+
+- function definition has tuple for input parameters
+- return value is also a tuple
+- function call passed in tuple
+- rcall merges tuples
+
+
+In bash I do:
+
+    find . -type f -name '*.lua' | xargs wc | sort -n
+
+Which would be the following AST
+
+    (mcall sort (n:true)
+      (mcall xargs (wc)
+        (call find "." type: "f" name: "*.lua")))
+
+`find` outputs a positional arg that's a list.
+
+-merge call puts the piped in args *after* the local args.
+-conflicting named args are ignored from pipe source.
+
+`xargs` calls it's 1st positional arg as a function, the rest as positional args,
+except the last is an array that's expanded to more positional args.
+
+`wc` takes n input args and treats it as a list. output is a list of objects with stats
+
+But since we aren't restricted to text for our inter-pipe data, we can do this better.
+
+    def count(fileList, chars:chars, words:words, lines:lines)
+      if not (chars or words or lines) then
+        (true, true, true) -> (chars, words, lines)
+      end
+      ...
+      // returns list of tuples containing stats for each file
+    end
+
+    def sort(list)
+      [] -> sorted
+      for i, item in list do
+        for j, other in sorted do
+          if item < other then
+            insert sorted j item
+            break
+          end
+        then
+          push sorted item
+        end
+      end
+      return sorted
+    end
+
+
+
+    [8 3 5 6 4 1]
+
+    list = (8 (3 (5 (6 (4 (1, false))))))
+    sorted = false
+
+    8 (3 (5 (6 (4 (1))))))
+
+def sortedInsert(sorted, item)
+  next = sorted.tail
+  if item < next.head then
+    sorted.tail = (item, sorted)
+  else
+    return sortedInsert(next, item)
+  end
+end
+
+def innerSort(sorted, list)
+  -- When we reach the end of the list, we're done
+  if not list then
+    return sorted
+  end
+
+  -- Insert the value
+  if not sorted or item < sorted.head then
+    sorted = (item, sorted)
+  else
+    sortedInsert(sorted, item)
+  end
+
+  -- And iterate on the list
+  return innerSort(sortedInsert(sorted, list.head), list.tail)
+end
+
+-- Sort a lisp-style cons list into a new list.
+def sort(list)
+  return innerSort(false, list)
+end
+
+
+
+------------------------------------------------------------

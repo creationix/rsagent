@@ -1,0 +1,12 @@
+[package]
+name = "parser"
+version = "0.1.0"
+authors = ["Tim Caswell <tim@creationix.com>"]
+
+build = "build.rs"
+
+[build-dependencies]
+lalrpop = "0.7.0"
+
+[dependencies]
+lalrpop-util = "0.7.0"
